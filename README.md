@@ -37,30 +37,83 @@ copy .env_example .env
 
 ## Scripts
 
-### Chat Models
+### `chat_model_basic_openai.py`
 
-| Script | Description |
-|---|---|
-| `chat_model_basic_openai.py` | Basic OpenAI chat using `init_chat_model` |
-| `chat_model_basic_openai_azure.py` | Azure OpenAI chat via the v1 API |
-| `chat_model_basic_gemini.py` | Google Gemini chat via the Gemini Developer API |
+A minimal introduction to calling OpenAI chat models with LangChain. Loads `OPENAI_API_KEY` from `.env`, initializes a model via `init_chat_model("gpt-5.4-nano")`, sends a single `HumanMessage`, and prints the text response. Use this as the starting point for OpenAI integration.
 
-### LangChain Chains (LCEL)
+**Requires:** `OPENAI_API_KEY`
 
-| Script | Description |
-|---|---|
-| `chains_openai.py` | Simple prompt → model chain |
-| `chains_under_the_hood.py` | How LCEL chains work internally |
-| `chains_parallel.py` | Parallel runnables with `RunnableParallel` |
-| `chains_branching_openai.py` | Conditional routing with `RunnableBranch` |
+---
 
-### Hugging Face & Transformers
+### `chat_model_basic_openai_azure.py`
 
-| Script | Description |
-|---|---|
-| `simple_transformer.py` | Sentiment analysis with the `transformers` pipeline |
-| `langchain_hug.py` | Local Q&A with `google/flan-t5-large` via LangChain |
-| `create_embeddings.py` | Text embeddings with `sentence-transformers` |
+Connects to Azure OpenAI using the v1 API. Reads `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, and `AZURE_OPENAI_DEPLOYMENT_NAME` from `.env`, then passes them to `init_chat_model` with `model_provider="openai"` and a custom `base_url`. Demonstrates how to use your Azure deployment name instead of a public OpenAI model name.
+
+**Requires:** `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT_NAME`
+
+---
+
+### `chat_model_basic_gemini.py`
+
+Calls Google Gemini through LangChain's Google GenAI integration. Loads `GOOGLE_API_KEY` from `.env` and optionally `GEMINI_MODEL` (defaults to `gemini-2.5-flash`). Initializes the model with `model_provider="google_genai"` and sends a simple math question to verify the connection.
+
+**Requires:** `GOOGLE_API_KEY`
+
+---
+
+### `chains_openai.py`
+
+Introduces LangChain Expression Language (LCEL) by building a prompt → model chain with the pipe operator (`|`). A `ChatPromptTemplate` with system and human messages is combined with an OpenAI chat model to generate jokes about a given topic. Shows the simplest form of chaining without extra output parsing.
+
+**Requires:** `OPENAI_API_KEY`
+
+---
+
+### `chains_under_the_hood.py`
+
+Explains what happens behind the scenes when you write `prompt | model`. Instead of using the pipe operator, it builds the same chain manually with `RunnableLambda` and `RunnableSequence`: format the prompt, invoke the model, then extract the text content. Useful for understanding how LCEL chains are composed step by step.
+
+**Requires:** `OPENAI_API_KEY`
+
+---
+
+### `chains_parallel.py`
+
+Demonstrates running multiple LLM calls in parallel with `RunnableParallel`. The chain first lists product features, then simultaneously generates pros and cons analyses from those features, and finally merges both results into a single review. Shows how to fan out work across branches and combine outputs in a later step.
+
+**Requires:** `OPENAI_API_KEY`
+
+---
+
+### `chains_branching_openai.py`
+
+Shows conditional routing with `RunnableBranch`. A classification chain first determines whether customer feedback is positive, negative, neutral, or needs escalation. Based on that label, the chain routes to a different prompt template and response strategy. Mimics a simple customer-support workflow where the response depends on sentiment.
+
+**Requires:** `OPENAI_API_KEY`
+
+---
+
+### `simple_transformer.py`
+
+A standalone Hugging Face `transformers` example with no LangChain. Uses the high-level `pipeline("text-classification")` API to run sentiment analysis on two product review texts — one negative and one positive — and prints the results as pandas DataFrames. No API keys needed; the default classification model is downloaded automatically on first run.
+
+**Requires:** None (downloads model on first run)
+
+---
+
+### `langchain_hug.py`
+
+Runs a local LLM without any cloud API. Loads `google/flan-t5-large` from Hugging Face, wraps it in a custom `Seq2SeqPipeline` (needed because newer `transformers` versions removed the `text2text-generation` task), and chains it with a `PromptTemplate` via LangChain's `HuggingFacePipeline`. Answers two open-ended questions step by step. Runs on CPU by default; first run downloads ~3 GB.
+
+**Requires:** `HUGGINGFACEHUB_API_TOKEN` (optional, for gated models or faster downloads)
+
+---
+
+### `create_embeddings.py`
+
+Generates dense vector embeddings for text using `sentence-transformers`. Loads the `all-mpnet-base-v2` model, encodes a sample sentence about access permissions, and prints the embedding vector along with its dimension (768). Useful for semantic search, clustering, or similarity matching. No API keys needed; the model is downloaded on first run.
+
+**Requires:** None (downloads model on first run)
 
 ## Usage
 
